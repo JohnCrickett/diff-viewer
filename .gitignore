@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Vercel local project link metadata
+.vercel
+
+# Static build output
+dist/
+.env*

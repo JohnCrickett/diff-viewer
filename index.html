@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8fb">
+    <title>Online Diff Viewer</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Online Diff Viewer</h1>
+        <p>Compare text, code, files, or URLs in side-by-side and unified views.</p>
+      </div>
+      <div class="header-actions">
+        <label class="field compact">
+          <span>Theme</span>
+          <select id="themeSelect" aria-label="Theme">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="contrast">High contrast</option>
+          </select>
+        </label>
+        <button id="saveSessionBtn" type="button">Save</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="input-grid" aria-label="Text inputs">
+        <article class="input-panel" id="leftDrop">
+          <div class="panel-heading">
+            <div>
+              <h2>Original</h2>
+              <p id="leftMeta">Paste, upload, drop, or fetch text.</p>
+            </div>
+            <label class="file-button">
+              Upload
+              <input id="leftFile" type="file" aria-label="Upload original file">
+            </label>
+          </div>
+          <textarea id="leftText" spellcheck="false" aria-label="Original text"></textarea>
+          <div class="url-row">
+            <input id="leftUrl" type="url" placeholder="https://example.com/file.txt" aria-label="Original URL">
+            <button id="leftFetch" type="button">Fetch</button>
+          </div>
+        </article>
+
+        <article class="input-panel" id="rightDrop">
+          <div class="panel-heading">
+            <div>
+              <h2>Modified</h2>
+              <p id="rightMeta">Paste, upload, drop, or fetch text.</p>
+            </div>
+            <label class="file-button">
+              Upload
+              <input id="rightFile" type="file" aria-label="Upload modified file">
+            </label>
+          </div>
+          <textarea id="rightText" spellcheck="false" aria-label="Modified text"></textarea>
+          <div class="url-row">
+            <input id="rightUrl" type="url" placeholder="https://example.com/file.txt" aria-label="Modified URL">
+            <button id="rightFetch" type="button">Fetch</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="controls" aria-label="Diff controls">
+        <div class="segmented" role="tablist" aria-label="View mode">
+          <button id="sideViewBtn" class="active" type="button" role="tab" aria-selected="true">Side by side</button>
+          <button id="unifiedViewBtn" type="button" role="tab" aria-selected="false">Unified</button>
+        </div>
+        <label class="field">
+          <span>Language</span>
+          <select id="languageSelect">
+            <option value="auto">Auto detect</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="json">JSON</option>
+            <option value="plain">Plain text</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Precision</span>
+          <select id="precisionSelect">
+            <option value="smart">Smart</option>
+            <option value="word">Word</option>
+            <option value="char">Character</option>
+            <option value="none">Line only</option>
+          </select>
+        </label>
+        <button id="diffBtn" class="primary" type="button">Compare</button>
+      </section>
+
+      <section class="options" aria-label="Diff options">
+        <label><input id="ignoreWhitespace" type="checkbox"> Ignore whitespace</label>
+        <label><input id="ignoreCase" type="checkbox"> Ignore case</label>
+        <label><input id="ignoreBlank" type="checkbox"> Ignore blank lines</label>
+        <label><input id="ignoreIndent" type="checkbox"> Ignore indentation</label>
+        <label><input id="ignoreLineEndings" type="checkbox" checked> Ignore line endings</label>
+        <label><input id="wrapToggle" type="checkbox" checked> Wrap lines</label>
+        <label><input id="syncToggle" type="checkbox" checked> Sync scrolling</label>
+        <label><input id="collapseToggle" type="checkbox" checked> Collapse unchanged</label>
+      </section>
+
+      <section class="status-row" aria-live="polite">
+        <div class="summary" id="summary">
+          <span><strong id="addedCount">0</strong> added</span>
+          <span><strong id="removedCount">0</strong> removed</span>
+          <span><strong id="unchangedCount">0</strong> unchanged</span>
+          <span><strong id="changedCount">0</strong> total changes</span>
+        </div>
+        <div id="progress" class="progress" hidden>
+          <span></span>
+          <strong>Computing diff...</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="navigator" aria-label="Change navigator">
+          <div class="nav-actions">
+            <button id="firstBtn" type="button" aria-label="First change">First</button>
+            <button id="prevBtn" type="button" aria-label="Previous change">Prev</button>
+            <button id="nextBtn" type="button" aria-label="Next change">Next</button>
+            <button id="lastBtn" type="button" aria-label="Last change">Last</button>
+          </div>
+          <h2>Changes</h2>
+          <div id="changeList" class="change-list" role="list"></div>
+          <h2>History</h2>
+          <div id="historyList" class="history-list" role="list"></div>
+        </aside>
+
+        <section class="diff-shell" aria-label="Diff result">
+          <div class="diff-toolbar">
+            <button id="copyDiffBtn" type="button">Copy diff</button>
+            <button id="exportPatchBtn" type="button">Patch</button>
+            <button id="exportHtmlBtn" type="button">HTML</button>
+            <button id="exportMarkdownBtn" type="button">Markdown</button>
+            <button id="exportJsonBtn" type="button">JSON</button>
+          </div>
+          <div id="emptyState" class="empty-state">Enter text on both sides, then compare.</div>
+          <div id="diffOutput" class="diff-output wrap" tabindex="0" aria-label="Computed diff"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>

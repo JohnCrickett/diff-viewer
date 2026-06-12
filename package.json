@@ -1,0 +1,17 @@
+{
+  "name": "online-diff-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A browser-only online diff viewer.",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html styles.css app.js diff-worker.js service-worker.js manifest.webmanifest icon.svg dist/",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "diff",
+    "viewer",
+    "static",
+    "pwa"
+  ],
+  "license": "MIT"
+}
